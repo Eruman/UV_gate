@@ -12,17 +12,26 @@ def play_sound(pin, frequency, duration):
     buzzer.duty_u16(0)  
 
 p = machine.Pin(7, machine.Pin.OUT)
-k = 16
+k = 8
 n = neopixel.NeoPixel(p, k)
 
-def rgb(color = 1):
+def rgb(color = 0):
     for i in range(k):
         if color == 0: n[i] = (0, 0, 0)
-        if color == 1: n[i] = (i * 2, 0, 0)
-        if color == 2: n[i] = (0, i * 2, 0)
-        if color == 3: n[i] = (0, 0, i * 2)
+        if color == 1: n[i] = (i * 2 + 5, 0, 0)
+        if color == 2: n[i] = (0, i * 2 + 5, 0)
+        if color == 3: n[i] = (0, 0, i * 2 + 5)
     n.write()
 
+def rgb_i(color = 0, index = 0):
+    rgb()
+    for i in range(index):
+        if color == 0: n[i] = (0, 0, 0)
+        if color == 1: n[i] = (i * 2 + 5, 0, 0)
+        if color == 2: n[i] = (0, i * 2 + 5, 0)
+        if color == 3: n[i] = (0, 0, i * 2 + 5)
+    n.write()
+   
 button_1 = machine.Pin(4, machine.Pin.IN, machine.Pin.PULL_UP)
 button_2 = machine.Pin(3, machine.Pin.IN, machine.Pin.PULL_UP)
 relay    = machine.Pin(2, machine.Pin.OUT)
@@ -95,12 +104,13 @@ while True:
 
     if state == 1 or state == 2: 
         relay.value(0)
-        rgb(2)
+        #rgb(2)
+        rgb_i(2, 8 - int(timer / 51 * 8))
         play_sound(14, 1000 - timer * 10, 50)
     
     if state == 3:
         relay.value(1)
-        rgb(1)
+        rgb_i(1, 1 + int(timer / 2911 * 8))
         if timer%10 == 0:
             res = load()
             #print(res)
