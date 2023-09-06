@@ -76,20 +76,19 @@ while True:
             state = 0
             end_time = utime.ticks_ms()
             execution_time = utime.ticks_diff(end_time, start_time)
-            print(execution_time)
+            print(int(execution_time/1000),"сек время исполнения.")
             res = load()                   #Загрузить значение ресурса лампы
             print("Текущий ресурс лампы:", res,"сек ", int(res/360)/10, "ч")    
         
-        if state == 1:
+        if state == 1 or state == 2:
             start_time = utime.ticks_ms()
             state = 3
-            timer = int(5 * 60 * 9.24)  #  5 мин
+            timer = int(5 * 60 * 9.7)  #  5 мин
+            if load() < 8000*1200:
+                timer = int( timer / 5 * 6 )
+            elif load() < 8000*2400:
+                timer = int( timer / 5 * 5.5 )
             
-        if state == 2:
-            start_time = utime.ticks_ms()
-            state = 3
-            timer = int(5 * 60 * 9.24)  #  5 мин
-
     if state == 0:
         relay.value(0)
         rgb(0)
@@ -97,13 +96,24 @@ while True:
     if state == 1 or state == 2: 
         relay.value(0)
         rgb(2)
-        play_sound(14, 1000 - timer * 2, 50)
+        play_sound(14, 1000 - timer * 10, 50)
     
     if state == 3:
         relay.value(1)
         rgb(1)
         if timer%10 == 0:
-            save(load() - 1)
+            res = load()
+            #print(res)
+            if res < 1000:
+                print("Ресурс лампы исчерпан.")
+                while True:
+                    relay.value(0)
+                    syrene()
+                    rgb(3)
+                    time.sleep(.5)
+                    rgb(0)
+                    time.sleep(1)                    
+            save(res - 1)
             #print(timer)
         time.sleep(.05) 
     
